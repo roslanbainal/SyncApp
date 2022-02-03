@@ -1,0 +1,36 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "Sync Data";
+}
+
+<div class="text-center">
+    <h4 class="display-4">Click Button To Sync Data</h4>
+
+    @if (TempData["Message"] != null)
+    {
+        <div id="status-msg" class="row justify-content-center mb-2 mt-2">
+            <div class="alert alert-warning fade show" role="alert">
+                <strong>@TempData["Message"]</strong>
+            </div>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <form asp-action="SyncData" asp-controller="Home" method="post" enctype="multipart/form-data">
+            @Html.Hidden("Username", "user@aemenersol.com")
+            @Html.Hidden("Password","Test@123")
+            <button class="btn btn-primary" type="submit">Sync Data</button>
+        </form>
+    </div>
+
+</div>
+
+@section scripts{
+    <script>
+        let node = document.getElementById('status-msg');
+
+        setTimeout(()=>{
+            node.style.display = 'none';
+        },5000);
+    </script>
+}
