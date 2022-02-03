@@ -18,7 +18,6 @@ namespace SyncApp.Controllers
 
         public HomeController(ILoginService loginService, ISyncService syncService)
         {
-            _logger = logger;
             this.loginService = loginService;
             this.syncService = syncService;
         }
