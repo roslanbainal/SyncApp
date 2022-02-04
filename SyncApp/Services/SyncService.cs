@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SyncApp.Data;
 using SyncApp.Models;
+using SyncApp.Models.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +17,14 @@ namespace SyncApp.Services
     {
         private readonly ILogger<SyncService> logger;
         private readonly AppDbContext context;
+        private readonly IMapper mapper;
         private string BASE_API = Constants.API.BASE_API;
 
-        public SyncService(ILogger<SyncService> logger, AppDbContext context)
+        public SyncService(ILogger<SyncService> logger, AppDbContext context, IMapper mapper)
         {
             this.logger = logger;
             this.context = context;
+            this.mapper = mapper;
         }
 
         public async Task<bool> GetDataTask(string token)
@@ -37,7 +41,7 @@ namespace SyncApp.Services
                         if (response.IsSuccessStatusCode)
                         {
                             string apiResponse = await response.Content.ReadAsStringAsync();
-                            var result = JsonConvert.DeserializeObject<List<Platform>>(apiResponse);
+                            var result = JsonConvert.DeserializeObject<List<PlatformViewModel>>(apiResponse);
 
                             logger.LogInformation("Success get data");
 
@@ -60,73 +64,55 @@ namespace SyncApp.Services
             }
         }
 
-        public async Task<bool> SyncDataTask(List<Platform> listPlatform)
+        public async Task<bool> SyncDataTask(List<PlatformViewModel> listPlatform)
         {
             try
             {
                 //Platform
-                foreach (Platform platform in listPlatform)
+                foreach (PlatformViewModel platform in listPlatform)
                 {
-                    var checkPlatformExist = await context.Platform.FirstOrDefaultAsync(x => x.Id == platform.Id);
+                    //check if platform id exist
+                    var checkPlatformExist = await context.Platform.FindAsync(platform.Id);
 
                     //if platform not exist yet
                     if (checkPlatformExist == null)
                     {
-                        var newPlatform = new Platform();
-                        newPlatform.Id = platform.Id;
-                        newPlatform.UniqueName = platform.UniqueName;
-                        newPlatform.Latitude = platform.Latitude;
-                        newPlatform.Longitude = platform.Longitude;
-                        newPlatform.CreatedAt = platform.CreatedAt;
-                        newPlatform.UpdatedAt = platform.UpdatedAt;
-                        newPlatform.Well = null;
+                        var data = mapper.Map(platform,new Platform());
 
-                        await context.Platform.AddAsync(newPlatform);
+                        await context.Platform.AddAsync(data);
                         await context.SaveChangesAsync();
 
                     }
                     else
                     {
-                        checkPlatformExist.Id = platform.Id;
-                        checkPlatformExist.UniqueName = platform.UniqueName;
-                        checkPlatformExist.Latitude = platform.Latitude;
-                        checkPlatformExist.Longitude = platform.Longitude;
-                        checkPlatformExist.CreatedAt = platform.CreatedAt;
-                        checkPlatformExist.UpdatedAt = platform.UpdatedAt;
+                        platform.CreatedAt = (!platform.CreatedAt.HasValue) ? checkPlatformExist.CreatedAt : platform.CreatedAt;
+
+                        mapper.Map(platform, checkPlatformExist);   
                         await context.SaveChangesAsync();
 
                     }
 
 
                     //Well
-                    foreach (Well well in platform.Well)
+                    foreach (WellViewModel well in platform.Well)
                     {
-                        var checkWellExist = await context.Well.FirstOrDefaultAsync(x => x.Id == well.Id);
+                        //check if well id exist
+                        var checkWellExist = await context.Well.FindAsync(well.Id);
 
                         //if well not exist
                         if (checkWellExist == null)
                         {
-                            var newWell = new Well();
-                            newWell.Id = well.Id;
-                            newWell.PlatformId = well.PlatformId;
-                            newWell.UniqueName = well.UniqueName;
-                            newWell.Latitude = well.Latitude;
-                            newWell.Longitude = well.Longitude;
-                            newWell.CreatedAt = well.CreatedAt;
-                            newWell.UpdatedAt = well.UpdatedAt;
 
-                            await context.Well.AddAsync(newWell);
+                            var data = mapper.Map(well, new Well());
+
+                            await context.Well.AddAsync(data);
                             await context.SaveChangesAsync();
                         }
                         else
                         {
-                            checkWellExist.Id = well.Id;
-                            checkWellExist.PlatformId = well.PlatformId;
-                            checkWellExist.UniqueName = well.UniqueName;
-                            checkWellExist.Latitude = well.Latitude;
-                            checkWellExist.Longitude = well.Longitude;
-                            checkWellExist.CreatedAt = well.CreatedAt;
-                            checkWellExist.UpdatedAt = well.UpdatedAt;
+                            well.CreatedAt = (!well.CreatedAt.HasValue) ? checkWellExist.CreatedAt : well.CreatedAt;
+
+                            mapper.Map(well, checkWellExist);
                             await context.SaveChangesAsync();
                         }
 
@@ -142,5 +128,6 @@ namespace SyncApp.Services
                 return false;
             }
         }
+        
     }
 }
