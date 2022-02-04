@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SyncApp.Data;
+using SyncApp.Helpers;
 using SyncApp.Services;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ namespace SyncApp
 
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<ISyncService, SyncService>();
+            services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             services.AddControllersWithViews();
         }
 
