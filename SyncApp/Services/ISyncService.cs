@@ -7,7 +7,7 @@ namespace SyncApp.Services
 {
     public interface ISyncService
     {
-        Task<bool> GetDataTask(string token);
+        Task<bool> GetDataAndSyncTask(string token);
         Task<bool> SyncDataTask(List<PlatformViewModel> listPlatform);
     }
 }

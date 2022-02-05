@@ -30,11 +30,11 @@ namespace SyncApp.Services
                     using (var response = await client.PostAsync($"{BASE_API}account/login", content))
                     {
                         string apiResponse = await response.Content.ReadAsStringAsync();
-                        var result = JsonConvert.DeserializeObject<string>(apiResponse);
+                        var token = JsonConvert.DeserializeObject<string>(apiResponse);
 
                         logger.LogInformation("Success call login api");
 
-                        return result;
+                        return token;
                     }
                 }
             }
