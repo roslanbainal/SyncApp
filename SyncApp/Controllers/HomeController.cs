@@ -33,7 +33,7 @@ namespace SyncApp.Controllers
 
             var token= await loginService.Login(model);
 
-            bool success = await syncService.GetDataTask(token);
+            bool success = await syncService.GetDataAndSyncTask(token);
 
             if(success)
             {

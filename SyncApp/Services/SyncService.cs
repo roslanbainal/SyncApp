@@ -27,7 +27,7 @@ namespace SyncApp.Services
             this.mapper = mapper;
         }
 
-        public async Task<bool> GetDataTask(string token)
+        public async Task<bool> GetDataAndSyncTask(string token)
         {
             try
             {
@@ -91,7 +91,6 @@ namespace SyncApp.Services
                         await context.SaveChangesAsync();
 
                     }
-
 
                     //Well
                     foreach (WellViewModel well in platform.Well)
